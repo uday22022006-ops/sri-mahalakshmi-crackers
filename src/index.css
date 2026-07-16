@@ -1,0 +1,133 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    font-size: 16px;
+  }
+
+  body {
+    background-color: #0B0B0B;
+    color: #FFFFFF;
+    font-family: 'Poppins', sans-serif;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+  }
+
+  ::selection {
+    background: rgba(212, 175, 55, 0.3);
+    color: #D4AF37;
+  }
+
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: #0B0B0B; }
+  ::-webkit-scrollbar-thumb { background: #D4AF37; border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: #F0D060; }
+}
+
+@layer components {
+  /* ── Gold text utilities ── */
+  .gold-text { @apply text-luxury-gold; }
+
+  .gold-gradient-text {
+    background: linear-gradient(135deg, #D4AF37 0%, #F0D060 45%, #A88A1A 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .shimmer-text {
+    background: linear-gradient(90deg,
+      #A88A1A 0%,
+      #D4AF37 20%,
+      #F0D060 35%,
+      #FFFFFF 50%,
+      #F0D060 65%,
+      #D4AF37 80%,
+      #A88A1A 100%
+    );
+    background-size: 250% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: shimmer 3.5s linear infinite;
+  }
+
+  /* ── Glass card ── */
+  .glass-card {
+    background: rgba(255, 255, 255, 0.035);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(212, 175, 55, 0.12);
+  }
+
+  /* ── Layout helpers ── */
+  .section-padding { @apply py-20 md:py-28 lg:py-32; }
+  .container-luxury { @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8; }
+
+  /* ── Luxury button base ── */
+  .luxury-btn {
+    @apply relative overflow-hidden px-8 py-4 font-body font-semibold tracking-widest text-xs uppercase transition-all duration-300;
+  }
+  .luxury-btn::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
+    transform: translateX(-100%);
+    transition: transform 0.5s ease;
+  }
+  .luxury-btn:hover::after { transform: translateX(100%); }
+
+  /* ── Opacity helpers not in default Tailwind palette ── */
+  .bg-luxury-gold\/8  { background-color: rgba(212, 175, 55, 0.08); }
+  .hover\:bg-luxury-gold\/8:hover { background-color: rgba(212, 175, 55, 0.08); }
+}
+
+@layer utilities {
+  .text-shadow-gold {
+    text-shadow: 0 0 20px rgba(212, 175, 55, 0.5), 0 0 40px rgba(212, 175, 55, 0.3);
+  }
+
+  /* Image scale on group-hover — explicit so Tailwind purge doesn't remove */
+  .group:hover .group-hover\:scale-108 {
+    transform: scale(1.08);
+  }
+  .group:hover .group-hover\:scale-110 {
+    transform: scale(1.10);
+  }
+}
+
+/* ── Custom keyframes ── */
+@keyframes shimmer {
+  0%   { background-position: -250% center; }
+  100% { background-position: 250% center; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-18px); }
+}
+
+@keyframes pulseGold {
+  0%, 100% { box-shadow: 0 0 12px rgba(212, 175, 55, 0.35); }
+  50%       { box-shadow: 0 0 28px rgba(212, 175, 55, 0.75); }
+}
+
+/* ── Smooth transition duration helpers ── */
+.transition-250 { transition-duration: 250ms; }
+.transition-400 { transition-duration: 400ms; }
+.transition-600 { transition-duration: 600ms; }
