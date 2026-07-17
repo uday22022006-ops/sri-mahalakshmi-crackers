@@ -7,8 +7,11 @@ interface FloatingActionsProps {
 }
 
 const FloatingActions = ({ cartItems, generateWhatsAppLink }: FloatingActionsProps) => {
+  const hasCartItems = cartItems.length > 0;
   return (
-    <div className="fixed bottom-20 sm:bottom-8 right-4 sm:right-6 flex flex-col gap-3.5 z-40">
+    <div className={`fixed right-4 sm:right-6 flex flex-col gap-3.5 z-40 transition-all duration-300 ${
+      hasCartItems ? 'bottom-32 sm:bottom-60' : 'bottom-20 sm:bottom-8'
+    }`}>
       {/* WhatsApp Button */}
       <motion.a
         href={generateWhatsAppLink()}

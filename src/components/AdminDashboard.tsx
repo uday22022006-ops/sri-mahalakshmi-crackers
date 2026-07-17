@@ -168,16 +168,20 @@ export default function AdminDashboard({ onLogout, onRefreshProducts, productsLi
       doc.text('ORDER INFORMATION', 14, 38);
       
       doc.setFont('helvetica', 'normal');
-      doc.setFontSize(10);
+      doc.setFontSize(9);
       doc.setTextColor(80, 80, 80);
       
       const orderIdVal = selectedOrder.order_id || `ORD-${selectedOrder.id}`;
       const orderDateVal = new Date(selectedOrder.created_at).toLocaleString('en-IN');
       
-      doc.text(`Order ID: ${orderIdVal}`, 14, 46);
-      doc.text(`Date & Time: ${orderDateVal}`, 14, 52);
-      doc.text(`Payment Method: ${selectedOrder.payment_method}`, 14, 58);
-      doc.text(`Current Status: ${selectedOrder.status}`, 14, 64);
+      doc.text(`Order ID: ${orderIdVal}`, 14, 45);
+      doc.text(`Date & Time: ${orderDateVal}`, 14, 50);
+      doc.text(`Payment Method: ${selectedOrder.payment_method}`, 14, 55);
+      doc.text(`Current Status: ${selectedOrder.status}`, 14, 60);
+      if (selectedOrder.delivery_date) {
+        const formattedDate = new Date(selectedOrder.delivery_date).toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric' });
+        doc.text(`Preferred Delivery: ${formattedDate}`, 14, 65);
+      }
       
       // Customer Details Section
       doc.setFont('helvetica', 'bold');
@@ -186,15 +190,22 @@ export default function AdminDashboard({ onLogout, onRefreshProducts, productsLi
       doc.text('CUSTOMER DETAILS', 120, 38);
       
       doc.setFont('helvetica', 'normal');
-      doc.setFontSize(10);
+      doc.setFontSize(9);
       doc.setTextColor(80, 80, 80);
-      doc.text(`Name: ${selectedOrder.customer_name}`, 120, 46);
-      doc.text(`Phone: ${selectedOrder.phone}`, 120, 52);
-      doc.text(`Pincode: ${selectedOrder.pincode}`, 120, 58);
+      doc.text(`Name: ${selectedOrder.customer_name}`, 120, 45);
+      doc.text(`Phone: ${selectedOrder.phone}`, 120, 50);
+      doc.text(`City: ${selectedOrder.city || 'N/A'}`, 120, 55);
+      doc.text(`Pincode: ${selectedOrder.pincode}`, 120, 60);
+      
+      let nextY = 65;
+      if (selectedOrder.landmark) {
+        doc.text(`Landmark: ${selectedOrder.landmark}`, 120, nextY);
+        nextY += 5;
+      }
       
       // Address word-wrapping
       const addressLines = doc.splitTextToSize(`Address: ${selectedOrder.address}`, 75);
-      doc.text(addressLines, 120, 64);
+      doc.text(addressLines, 120, nextY);
       
       // Horizontal Line divider
       doc.line(14, 82, 196, 82);
@@ -1696,14 +1707,22 @@ export default function AdminDashboard({ onLogout, onRefreshProducts, productsLi
                 {/* CUSTOMER DETAILS */}
                 <div className="bg-white/[0.015] border border-white/[0.05] p-4 rounded-sm flex flex-col gap-2">
                   <p className="text-luxury-gold uppercase text-[10px] tracking-wider font-bold border-b border-white/5 pb-1.5 mb-1">
-                    Customer Details
+                    Customer & Delivery Details
                   </p>
                   <p className="text-white font-bold text-sm">{selectedOrder.customer_name}</p>
                   <p className="font-semibold text-luxury-gold">Phone: {selectedOrder.phone}</p>
-                  <p>Pincode: {selectedOrder.pincode}</p>
+                  <p>City: <span className="font-bold text-white">{selectedOrder.city || 'N/A'}</span> | Pincode: <span className="font-bold text-white">{selectedOrder.pincode}</span></p>
+                  {selectedOrder.landmark && (
+                    <p>Landmark: <span className="italic text-white/90">{selectedOrder.landmark}</span></p>
+                  )}
+                  {selectedOrder.delivery_date && (
+                    <p className="text-yellow-400">
+                      Preferred Date: <span className="font-semibold">{new Date(selectedOrder.delivery_date).toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+                    </p>
+                  )}
                   <div className="border-t border-white/5 pt-1.5 mt-0.5">
                     <p className="text-white/40 text-[9px] uppercase tracking-wider font-bold mb-0.5">Delivery Address</p>
-                    <p className="text-white/80 leading-relaxed italic truncate max-w-xs" title={selectedOrder.address}>{selectedOrder.address}</p>
+                    <p className="text-white/80 leading-relaxed italic break-words" title={selectedOrder.address}>{selectedOrder.address}</p>
                   </div>
                 </div>
               </div>
