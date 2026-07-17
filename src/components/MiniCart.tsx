@@ -74,7 +74,10 @@ export default function MiniCart({
     const totalItems = cartItems.reduce((acc, item) => acc + item.qty, 0);
 
     return (
-      <div className="h-full flex flex-col bg-[#0A0A0A] text-white">
+      <div className={isMobile 
+        ? "flex flex-col h-full bg-[#0A0A0A] text-white" 
+        : "flex flex-col h-screen bg-[#0A0A0A] text-white overflow-hidden"
+      }>
         {/* Header (flex-shrink-0) */}
         <div className="flex-shrink-0 px-6 py-5 border-b border-luxury-gold/15 bg-[#0A0A0A]/95 backdrop-blur-md flex items-center justify-between">
           <div>
@@ -113,8 +116,8 @@ export default function MiniCart({
           </div>
         ) : (
           <>
-            {/* 1. Products List (h-[260px] overflow-y-auto flex-shrink-0) */}
-            <div className="h-[260px] overflow-y-auto p-6 space-y-6 border-b border-luxury-gold/10 scrollbar-thin scrollbar-thumb-luxury-gold/20 flex-shrink-0">
+            {/* 1. Products List (max-h-[180px] overflow-y-auto flex-shrink-0) */}
+            <div className="max-h-[180px] overflow-y-auto p-6 space-y-6 border-b border-luxury-gold/10 scrollbar-thin scrollbar-thumb-luxury-gold/20 flex-shrink-0">
               {/* Digital Invoice Preview */}
               <div className="p-4 bg-black/60 border border-luxury-gold/20 rounded-lg font-mono text-xs text-white/90 shadow-inner">
                 <div className="text-center font-bold text-luxury-gold border-b border-dashed border-white/20 pb-2 mb-2 uppercase tracking-wider">
@@ -394,7 +397,7 @@ export default function MiniCart({
       <AnimatePresence>
         {cartOpen && (
           <motion.div
-            className="hidden lg:flex fixed top-0 right-0 h-screen w-[380px] z-[51] border-l border-luxury-gold/20 shadow-[0_0_50px_rgba(0,0,0,0.8)] flex flex-col font-body overflow-hidden"
+            className="hidden lg:flex fixed top-0 right-0 h-screen w-[380px] z-[51] border-l border-luxury-gold/20 shadow-[0_0_50px_rgba(0,0,0,0.8)] flex-col font-body overflow-hidden"
             initial={{ x: '100%' }}
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
