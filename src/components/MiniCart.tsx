@@ -74,14 +74,17 @@ export default function MiniCart({
     const totalItems = cartItems.reduce((acc, item) => acc + item.qty, 0);
 
     return (
-      <div className="flex flex-col h-full bg-[#0A0A0A] text-white">
+      <div className={isMobile 
+        ? "flex flex-col h-full bg-[#0A0A0A] text-white" 
+        : "flex flex-col h-[calc(100vh-40px)] overflow-hidden bg-[#0A0A0A] text-white"
+      }>
         {/* Fixed Header */}
         <div className="sticky top-0 z-10 px-6 py-5 border-b border-luxury-gold/15 bg-[#0A0A0A]/95 backdrop-blur-md flex items-center justify-between flex-shrink-0">
           <div>
             <div className="flex items-center gap-2">
               <span className="text-xl">🛒</span>
               <h2 className="font-heading text-xl font-bold tracking-wide text-white">
-                {isMobile ? "Shopping Cart" : "Shopping Cart"}
+                Shopping Cart
               </h2>
             </div>
             <p className="text-[11px] text-luxury-gold/75 tracking-wide mt-1.5 font-medium">
@@ -239,8 +242,11 @@ export default function MiniCart({
               </div>
             </div>
 
-            {/* 3. Delivery Details Form (flex-1 scrollable) */}
-            <div className="flex-1 overflow-y-auto min-h-0 px-4 pb-32 no-scrollbar">
+            {/* 3. Delivery Details Form */}
+            <div className={isMobile 
+              ? "flex-1 overflow-y-auto min-h-0 px-4 pb-32 no-scrollbar" 
+              : "flex-1 min-h-0 overflow-y-auto pr-2 no-scrollbar px-4 pb-6"
+            }>
               <p className="text-luxury-gold/60 text-[10px] uppercase tracking-widest font-bold mt-4 mb-3 px-2">
                 Delivery Details
               </p>
@@ -391,7 +397,7 @@ export default function MiniCart({
       <AnimatePresence>
         {cartOpen && (
           <motion.div
-            className="hidden lg:flex fixed top-0 right-0 h-screen w-[380px] z-[51] border-l border-luxury-gold/20 shadow-[0_0_50px_rgba(0,0,0,0.8)] flex-col font-body"
+            className="hidden lg:flex fixed top-10 right-0 h-[calc(100vh-40px)] w-[380px] z-[51] border-l border-luxury-gold/20 shadow-[0_0_50px_rgba(0,0,0,0.8)] flex-col font-body overflow-hidden"
             initial={{ x: '100%' }}
             animate={{ x: 0 }}
             exit={{ x: '100%' }}

@@ -99,8 +99,8 @@ const TodaysOffers = ({ addToCart }: TodaysOffersProps) => {
       id: 200 + offer.id,
       name: offer.name,
       category: 'Offer',
-      originalPrice: offer.originalPrice,
-      discountPrice: offer.salePrice,
+      price: offer.salePrice,
+      original_price: offer.originalPrice,
       image: offer.image,
       discount: offer.discount,
       description: offer.description

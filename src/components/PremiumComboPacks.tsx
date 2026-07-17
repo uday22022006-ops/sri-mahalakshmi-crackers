@@ -193,8 +193,8 @@ const PremiumComboPacks = ({ addToCart }: PremiumComboPacksProps) => {
                     id: 100 + pack.id,
                     name: pack.name,
                     category: 'Combo',
-                    originalPrice: pack.originalPrice,
-                    discountPrice: pack.salePrice,
+                    price: pack.salePrice,
+                    original_price: pack.originalPrice,
                     image: pack.image,
                     discount: pack.discount,
                     description: pack.tagline
