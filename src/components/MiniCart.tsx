@@ -74,12 +74,9 @@ export default function MiniCart({
     const totalItems = cartItems.reduce((acc, item) => acc + item.qty, 0);
 
     return (
-      <div className={isMobile 
-        ? "flex flex-col h-full bg-[#0A0A0A] text-white" 
-        : "flex flex-col h-[calc(100vh-40px)] overflow-hidden bg-[#0A0A0A] text-white"
-      }>
-        {/* Fixed Header */}
-        <div className="sticky top-0 z-10 px-6 py-5 border-b border-luxury-gold/15 bg-[#0A0A0A]/95 backdrop-blur-md flex items-center justify-between flex-shrink-0">
+      <div className="h-full flex flex-col bg-[#0A0A0A] text-white">
+        {/* Header (flex-shrink-0) */}
+        <div className="flex-shrink-0 px-6 py-5 border-b border-luxury-gold/15 bg-[#0A0A0A]/95 backdrop-blur-md flex items-center justify-between">
           <div>
             <div className="flex items-center gap-2">
               <span className="text-xl">🛒</span>
@@ -99,7 +96,7 @@ export default function MiniCart({
           </button>
         </div>
 
-        {/* Empty State vs Content */}
+        {/* Content Body Area */}
         {cartItems.length === 0 ? (
           <div className="flex-1 flex flex-col items-center justify-center text-center p-6">
             <Flame className="w-12 h-12 text-luxury-gold/20 mb-4 animate-pulse" />
@@ -116,7 +113,7 @@ export default function MiniCart({
           </div>
         ) : (
           <>
-            {/* 1. Products List (h-[260px] scrollable) */}
+            {/* 1. Products List (h-[260px] overflow-y-auto flex-shrink-0) */}
             <div className="h-[260px] overflow-y-auto p-6 space-y-6 border-b border-luxury-gold/10 scrollbar-thin scrollbar-thumb-luxury-gold/20 flex-shrink-0">
               {/* Digital Invoice Preview */}
               <div className="p-4 bg-black/60 border border-luxury-gold/20 rounded-lg font-mono text-xs text-white/90 shadow-inner">
@@ -165,7 +162,7 @@ export default function MiniCart({
                       <img src={item.image} alt={item.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                     </div>
 
-                    {/* Center: Details & Qty */}
+                    {/* Center: Details & Circular Qty Buttons */}
                     <div className="flex-1 min-w-0 flex flex-col justify-between py-1">
                       <div>
                         <span className="text-luxury-gold/60 font-body text-[9px] tracking-wider uppercase font-semibold block mb-0.5">{item.category}</span>
@@ -209,7 +206,7 @@ export default function MiniCart({
               </div>
             </div>
 
-            {/* 2. Order Summary Panel */}
+            {/* 2. Order Summary Panel (flex-shrink-0) */}
             <div className="px-6 py-4 bg-black/40 border-b border-luxury-gold/10 flex-shrink-0 space-y-2.5">
               <div className="flex justify-between text-xs text-white/50 font-body">
                 <span>Subtotal</span>
@@ -242,12 +239,12 @@ export default function MiniCart({
               </div>
             </div>
 
-            {/* 3. Delivery Details Form */}
+            {/* 3. Scrollable Content - Delivery Form inputs (flex-1 overflow-y-auto min-h-0) */}
             <div className={isMobile 
               ? "flex-1 overflow-y-auto min-h-0 px-4 pb-32 no-scrollbar" 
-              : "flex-1 min-h-0 overflow-y-auto pr-2 no-scrollbar px-4 pb-6"
+              : "flex-1 min-h-0 overflow-y-auto pr-2 no-scrollbar px-4 py-4"
             }>
-              <p className="text-luxury-gold/60 text-[10px] uppercase tracking-widest font-bold mt-4 mb-3 px-2">
+              <p className="text-luxury-gold/60 text-[10px] uppercase tracking-widest font-bold mb-3 px-2">
                 Delivery Details
               </p>
               <div className="space-y-3 px-2">
@@ -307,8 +304,8 @@ export default function MiniCart({
               </div>
             </div>
 
-            {/* 4. Sticky Checkout Section (sticky bottom) */}
-            <div className="sticky bottom-0 bg-[#0A0A0A] border-t border-yellow-500/20 p-4 flex-shrink-0 z-10 space-y-3">
+            {/* 4. Sticky Checkout Section (placed outside scrollable content, sticky bottom, flex-shrink-0) */}
+            <div className="sticky bottom-0 flex-shrink-0 bg-[#0A0A0A] border-t border-yellow-500/20 p-4 z-10 space-y-3">
               {finalTotal < 2000 && (
                 <div className="text-center">
                   <p className="font-body text-[10px] text-red-400 bg-red-950/20 border border-red-900/30 py-2 px-3 rounded-md">
@@ -397,7 +394,7 @@ export default function MiniCart({
       <AnimatePresence>
         {cartOpen && (
           <motion.div
-            className="hidden lg:flex fixed top-10 right-0 h-[calc(100vh-40px)] w-[380px] z-[51] border-l border-luxury-gold/20 shadow-[0_0_50px_rgba(0,0,0,0.8)] flex-col font-body overflow-hidden"
+            className="hidden lg:flex fixed top-0 right-0 h-screen w-[380px] z-[51] border-l border-luxury-gold/20 shadow-[0_0_50px_rgba(0,0,0,0.8)] flex flex-col font-body overflow-hidden"
             initial={{ x: '100%' }}
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
