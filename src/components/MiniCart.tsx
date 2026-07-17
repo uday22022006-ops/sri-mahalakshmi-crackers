@@ -130,8 +130,8 @@ export default function MiniCart({
                 </div>
 
                 <div className="space-y-1.5 max-h-[120px] overflow-y-auto pr-1 no-scrollbar">
-                  {cartItems.map((item) => (
-                    <div key={item.id} className="flex justify-between items-center text-[11px]">
+                  {cartItems.map((item, index) => (
+                    <div key={`${item.id}-${index}`} className="flex justify-between items-center text-[11px]">
                       <span className="w-1/2 text-left truncate pr-1">{item.name}</span>
                       <span className="w-1/6 text-center text-luxury-gold font-bold">{item.qty}</span>
                       <span className="w-1/3 text-right">{(item.price * item.qty).toLocaleString('en-IN')}</span>
@@ -155,9 +155,9 @@ export default function MiniCart({
                 <p className="text-white/40 text-[10px] uppercase tracking-widest font-bold">
                   Shopping Cart Items ({totalItems})
                 </p>
-                {cartItems.map((item) => (
+                {cartItems.map((item, index) => (
                   <div
-                    key={item.id}
+                    key={`${item.id}-${index}`}
                     className="flex gap-4 p-4 rounded-2xl bg-white/[0.02] backdrop-blur-md border border-luxury-gold/20 hover:border-luxury-gold/45 shadow-[0_4px_20px_rgba(0,0,0,0.4)] hover:shadow-[0_4px_25px_rgba(212,175,55,0.08)] transition-all duration-300 group relative"
                   >
                     {/* Left: Large Image */}
