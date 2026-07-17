@@ -75,7 +75,7 @@ export default function MiniCart({
 
     return (
       <div className="flex flex-col h-full bg-[#0A0A0A] text-white">
-        {/* Sticky Luxury Header */}
+        {/* Fixed Header */}
         <div className="sticky top-0 z-10 px-6 py-5 border-b border-luxury-gold/15 bg-[#0A0A0A]/95 backdrop-blur-md flex items-center justify-between flex-shrink-0">
           <div>
             <div className="flex items-center gap-2">
@@ -96,7 +96,7 @@ export default function MiniCart({
           </button>
         </div>
 
-        {/* Main Content Area */}
+        {/* Empty State vs Content */}
         {cartItems.length === 0 ? (
           <div className="flex-1 flex flex-col items-center justify-center text-center p-6">
             <Flame className="w-12 h-12 text-luxury-gold/20 mb-4 animate-pulse" />
@@ -113,8 +113,8 @@ export default function MiniCart({
           </div>
         ) : (
           <>
-            {/* 1. Scrollable Product List Area (Height ~45vh) */}
-            <div className="h-[45vh] min-h-[280px] overflow-y-auto p-6 space-y-6 border-b border-luxury-gold/10 no-scrollbar flex-shrink-0">
+            {/* 1. Products List (h-[260px] scrollable) */}
+            <div className="h-[260px] overflow-y-auto p-6 space-y-6 border-b border-luxury-gold/10 scrollbar-thin scrollbar-thumb-luxury-gold/20 flex-shrink-0">
               {/* Digital Invoice Preview */}
               <div className="p-4 bg-black/60 border border-luxury-gold/20 rounded-lg font-mono text-xs text-white/90 shadow-inner">
                 <div className="text-center font-bold text-luxury-gold border-b border-dashed border-white/20 pb-2 mb-2 uppercase tracking-wider">
@@ -162,7 +162,7 @@ export default function MiniCart({
                       <img src={item.image} alt={item.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                     </div>
 
-                    {/* Center: Details & Circular Qty Buttons */}
+                    {/* Center: Details & Qty */}
                     <div className="flex-1 min-w-0 flex flex-col justify-between py-1">
                       <div>
                         <span className="text-luxury-gold/60 font-body text-[9px] tracking-wider uppercase font-semibold block mb-0.5">{item.category}</span>
@@ -186,7 +186,7 @@ export default function MiniCart({
                       </div>
                     </div>
 
-                    {/* Right: Price & Remove Button */}
+                    {/* Right: Pricing & Remove */}
                     <div className="flex flex-col justify-between items-end py-1 flex-shrink-0 text-right">
                       <div className="flex flex-col items-end">
                         <span className="text-luxury-gold font-bold text-sm font-mono">₹{(item.price * item.qty).toLocaleString('en-IN')}</span>
@@ -206,12 +206,45 @@ export default function MiniCart({
               </div>
             </div>
 
-            {/* 2. Scrollable Customer Form Area (Max-Height ~35vh, scrolls independently) */}
-            <div className="max-h-[35vh] overflow-y-auto p-6 border-b border-luxury-gold/10 no-scrollbar bg-black/25 flex-1">
-              <p className="text-luxury-gold/60 text-[10px] uppercase tracking-widest font-bold mb-4">
+            {/* 2. Order Summary Panel */}
+            <div className="px-6 py-4 bg-black/40 border-b border-luxury-gold/10 flex-shrink-0 space-y-2.5">
+              <div className="flex justify-between text-xs text-white/50 font-body">
+                <span>Subtotal</span>
+                <span className="line-through font-mono">₹{originalTotal.toLocaleString('en-IN')}</span>
+              </div>
+              <div className="flex justify-between text-xs text-green-400 font-body">
+                <span>Diwali Savings</span>
+                <span className="font-mono">-₹{savings.toLocaleString('en-IN')} ({discountPct}% OFF)</span>
+              </div>
+              <div className="h-px bg-luxury-gold/15 my-1" />
+              <div className="flex justify-between items-center text-sm text-white font-body font-semibold">
+                <span className="text-luxury-gold uppercase tracking-wider text-xs">Grand Total</span>
+                <motion.span
+                  animate={{
+                    scale: [1, 1.05, 1],
+                    opacity: [1, 0.9, 1],
+                  }}
+                  transition={{
+                    duration: 1.5,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                  }}
+                  className="text-2xl font-heading font-extrabold text-green-400 font-mono"
+                  style={{
+                    textShadow: "0 0 8px rgba(34,197,94,0.6), 0 0 20px rgba(34,197,94,0.4)",
+                  }}
+                >
+                  ₹{finalTotal.toLocaleString('en-IN')}
+                </motion.span>
+              </div>
+            </div>
+
+            {/* 3. Delivery Details Form (flex-1 scrollable) */}
+            <div className="flex-1 overflow-y-auto min-h-0 px-4 pb-32 no-scrollbar">
+              <p className="text-luxury-gold/60 text-[10px] uppercase tracking-widest font-bold mt-4 mb-3 px-2">
                 Delivery Details
               </p>
-              <div className="space-y-3 pb-2">
+              <div className="space-y-3 px-2">
                 <input
                   type="text"
                   placeholder="Customer Name"
@@ -268,42 +301,10 @@ export default function MiniCart({
               </div>
             </div>
 
-            {/* 3. Sticky Checkout Summary & Button Footer (Always Visible at bottom) */}
-            <div className="p-6 border-t border-luxury-gold/15 bg-gradient-to-b from-[#0A0A0A] to-[#050505] flex-shrink-0 z-10">
-              <div className="space-y-2 mb-4">
-                <div className="flex justify-between text-xs text-white/50 font-body">
-                  <span>Subtotal</span>
-                  <span className="line-through font-mono">₹{originalTotal.toLocaleString('en-IN')}</span>
-                </div>
-                <div className="flex justify-between text-xs text-green-400 font-body">
-                  <span>Savings</span>
-                  <span className="font-mono">-₹{savings.toLocaleString('en-IN')} ({discountPct}% OFF)</span>
-                </div>
-                <div className="h-px bg-luxury-gold/15 my-2" />
-                <div className="flex justify-between items-center text-sm text-white font-body font-semibold">
-                  <span className="text-luxury-gold uppercase tracking-wider text-xs">Grand Total</span>
-                  <motion.span
-                    animate={{
-                      scale: [1, 1.05, 1],
-                      opacity: [1, 0.9, 1],
-                    }}
-                    transition={{
-                      duration: 1.5,
-                      repeat: Infinity,
-                      ease: "easeInOut",
-                    }}
-                    className="text-2xl font-heading font-extrabold text-green-400 font-mono"
-                    style={{
-                      textShadow: "0 0 8px rgba(34,197,94,0.6), 0 0 20px rgba(34,197,94,0.4)",
-                    }}
-                  >
-                    ₹{finalTotal.toLocaleString('en-IN')}
-                  </motion.span>
-                </div>
-              </div>
-
+            {/* 4. Sticky Checkout Section (sticky bottom) */}
+            <div className="sticky bottom-0 bg-[#0A0A0A] border-t border-yellow-500/20 p-4 flex-shrink-0 z-10 space-y-3">
               {finalTotal < 2000 && (
-                <div className="mb-4 text-center">
+                <div className="text-center">
                   <p className="font-body text-[10px] text-red-400 bg-red-950/20 border border-red-900/30 py-2 px-3 rounded-md">
                     ⚠️ Minimum order: <b>₹2,000</b>. Add ₹{(2000 - finalTotal).toLocaleString('en-IN')} more to checkout.
                   </p>
@@ -311,7 +312,7 @@ export default function MiniCart({
               )}
 
               {checkoutStatus && (
-                <div className={`p-3 rounded-lg text-xs font-body mb-4 border ${
+                <div className={`p-3 rounded-lg text-xs font-body border ${
                   checkoutStatus.status === 'error'
                     ? 'bg-red-950/20 border-red-900/40 text-red-200'
                     : checkoutStatus.status === 'success'
