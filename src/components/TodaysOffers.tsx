@@ -11,7 +11,7 @@ const offers = [
     salePrice: 875,
     discount: 75,
     description: '50-piece premium sparkler bundle — golden rain & silver fountain mix.',
-    image: 'https://images.unsplash.com/photo-1546026423-cc4642628d2b?w=500&q=75',
+    image: '/offers/flash-deal.jpg',
     stock: 'Only 8 left!',
     badgeColor: '#D4AF37',
     expiresIn: 14400,
@@ -24,7 +24,7 @@ const offers = [
     salePrice: 2400,
     discount: 70,
     description: '120+ pieces — rockets, chakkars, flower pots, sparklers, fancy items.',
-    image: 'https://images.unsplash.com/photo-1513151233558-d860c5398176?w=500&q=75',
+    image: '/offers/best-value.jpg',
     stock: 'Only 15 left!',
     badgeColor: '#5B0A1A',
     expiresIn: 28800,
@@ -37,7 +37,7 @@ const offers = [
     salePrice: 580,
     discount: 71,
     description: 'High-altitude artillery shells — 200ft burst radius, 5 colours.',
-    image: 'https://images.unsplash.com/photo-1467810563316-b5476525c0f9?w=500&q=75',
+    image: '/offers/new-arrival.jpg',
     stock: 'Only 20 left!',
     badgeColor: '#D4AF37',
     expiresIn: 7200,
@@ -50,7 +50,7 @@ const offers = [
     salePrice: 1350,
     discount: 70,
     description: '8 premium flower-pot fountains — 90-second show each, 7-colour layers.',
-    image: 'https://images.unsplash.com/photo-1574634534894-89d7576c8259?w=500&q=75',
+    image: '/offers/top-seller.jpg',
     stock: 'Only 12 left!',
     badgeColor: '#5B0A1A',
     expiresIn: 21600,
@@ -214,11 +214,10 @@ const TodaysOffers = ({ addToCart }: TodaysOffersProps) => {
                 {/* Add to cart */}
                 <motion.button
                   onClick={() => handleAdd(offer)}
-                  className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-sm font-body text-xs font-semibold tracking-widest uppercase transition-all duration-300 ${
-                    addedIds.includes(offer.id)
+                  className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-sm font-body text-xs font-semibold tracking-widest uppercase transition-all duration-300 ${addedIds.includes(offer.id)
                       ? 'bg-green-700/80 text-white border-transparent'
                       : 'bg-luxury-gold text-luxury-black hover:bg-luxury-gold-light'
-                  }`}
+                    }`}
                   whileTap={{ scale: 0.97 }}
                 >
                   {addedIds.includes(offer.id) ? (

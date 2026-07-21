@@ -3,12 +3,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Plus, Edit2, Trash2, LogOut, Search, Package, AlertTriangle,
   TrendingUp, IndianRupee, X, Upload, CheckCircle, Info, ExternalLink,
-  ClipboardList, Eye, Clock, ShoppingBag, RefreshCw
+  ClipboardList, Eye, Clock, ShoppingBag, RefreshCw, Mail, Tag, Calendar
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import type { Product } from '../types';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
+
 
 interface AdminDashboardProps {
   onLogout: () => void;
@@ -27,14 +28,23 @@ export default function AdminDashboard({ onLogout, onRefreshProducts, productsLi
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
 
+  // Navigation & Sections State
+  const [activeSection, setActiveSection] = useState<'products' | 'orders' | 'subscribers'>('products');
+
   // Orders Section State
-  const [activeSection, setActiveSection] = useState<'products' | 'orders'>('products');
   const [orders, setOrders] = useState<any[]>([]);
   const [ordersLoading, setOrdersLoading] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
   const [orderItemsList, setOrderItemsList] = useState<any[]>([]);
   const [itemsLoading, setItemsLoading] = useState(false);
   const [orderSearchQuery, setOrderSearchQuery] = useState('');
+
+  // Newsletter Subscribers Section State
+  const [subscribers, setSubscribers] = useState<any[]>([]);
+  const [subscribersLoading, setSubscribersLoading] = useState(false);
+  const [subscriberSearchQuery, setSubscriberSearchQuery] = useState('');
+  const [isDeleteSubscriberModalOpen, setIsDeleteSubscriberModalOpen] = useState(false);
+  const [currentSubscriber, setCurrentSubscriber] = useState<any | null>(null);
 
   // Modals state
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
@@ -86,9 +96,30 @@ export default function AdminDashboard({ onLogout, onRefreshProducts, productsLi
     }
   };
 
+  // Fetch subscribers list
+  const fetchSubscribers = async () => {
+    setSubscribersLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('newsletter_subscribers')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setSubscribers(data || []);
+    } catch (err: any) {
+      console.error('Error fetching subscribers:', err);
+      showToast('error', 'Failed to fetch subscribers: ' + err.message);
+    } finally {
+      setSubscribersLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (activeSection === 'orders') {
       fetchOrders();
+    } else if (activeSection === 'subscribers') {
+      fetchSubscribers();
     }
   }, [activeSection]);
 
@@ -145,35 +176,35 @@ export default function AdminDashboard({ onLogout, onRefreshProducts, productsLi
 
     try {
       const doc = new jsPDF();
-      
+
       // Title / Header
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(22);
       doc.setTextColor(180, 140, 40); // Luxury Gold
       doc.text('SRI MAHALAKSHMI CRACKERS', 14, 20);
-      
+
       doc.setFontSize(10);
       doc.setFont('helvetica', 'normal');
       doc.setTextColor(100, 100, 100);
       doc.text('Premium Sivakasi Crackers Direct to Your Doorstep', 14, 26);
-      
+
       // Horizontal Line divider
       doc.setDrawColor(220, 220, 220);
       doc.line(14, 30, 196, 30);
-      
+
       // Order Information Section
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(12);
       doc.setTextColor(0, 0, 0);
       doc.text('ORDER INFORMATION', 14, 38);
-      
+
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(9);
       doc.setTextColor(80, 80, 80);
-      
+
       const orderIdVal = selectedOrder.order_id || `ORD-${selectedOrder.id}`;
       const orderDateVal = new Date(selectedOrder.created_at).toLocaleString('en-IN');
-      
+
       doc.text(`Order ID: ${orderIdVal}`, 14, 45);
       doc.text(`Date & Time: ${orderDateVal}`, 14, 50);
       doc.text(`Payment Method: ${selectedOrder.payment_method}`, 14, 55);
@@ -182,13 +213,13 @@ export default function AdminDashboard({ onLogout, onRefreshProducts, productsLi
         const formattedDate = new Date(selectedOrder.delivery_date).toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric' });
         doc.text(`Preferred Delivery: ${formattedDate}`, 14, 65);
       }
-      
+
       // Customer Details Section
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(12);
       doc.setTextColor(0, 0, 0);
       doc.text('CUSTOMER DETAILS', 120, 38);
-      
+
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(9);
       doc.setTextColor(80, 80, 80);
@@ -196,33 +227,33 @@ export default function AdminDashboard({ onLogout, onRefreshProducts, productsLi
       doc.text(`Phone: ${selectedOrder.phone}`, 120, 50);
       doc.text(`City: ${selectedOrder.city || 'N/A'}`, 120, 55);
       doc.text(`Pincode: ${selectedOrder.pincode}`, 120, 60);
-      
+
       let nextY = 65;
       if (selectedOrder.landmark) {
         doc.text(`Landmark: ${selectedOrder.landmark}`, 120, nextY);
         nextY += 5;
       }
-      
+
       // Address word-wrapping
       const addressLines = doc.splitTextToSize(`Address: ${selectedOrder.address}`, 75);
       doc.text(addressLines, 120, nextY);
-      
+
       // Horizontal Line divider
       doc.line(14, 82, 196, 82);
-      
+
       // Table Header and Body
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(12);
       doc.setTextColor(0, 0, 0);
       doc.text('ORDER ITEMS', 14, 90);
-      
+
       const tableData = orderItemsList.map((item) => [
         item.name || item.product_name,
         item.qty,
         `Rs. ${item.price.toLocaleString('en-IN')}`,
         `Rs. ${(item.price * item.qty).toLocaleString('en-IN')}`
       ]);
-      
+
       autoTable(doc, {
         startY: 96,
         head: [['Product Name', 'Quantity', 'Unit Price', 'Subtotal']],
@@ -237,20 +268,48 @@ export default function AdminDashboard({ onLogout, onRefreshProducts, productsLi
           3: { halign: 'right', cellWidth: 35 }
         }
       });
-      
+
       // Payment Summary
       const finalY = (doc as any).lastAutoTable.finalY + 10;
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(12);
       doc.setTextColor(0, 0, 0);
       doc.text(`Grand Total: Rs. ${selectedOrder.total_amount.toLocaleString('en-IN')}`, 196, finalY, { align: 'right' });
-      
+
       // Save PDF
       doc.save(`Invoice-${orderIdVal}.pdf`);
       showToast('success', 'PDF Invoice generated and downloaded successfully!');
     } catch (err: any) {
       console.error('Error generating PDF:', err);
       showToast('error', 'Failed to generate PDF: ' + err.message);
+    }
+  };
+
+  // Delete Subscriber Handler
+  const handleDeleteSubscriberConfirm = async () => {
+    if (!currentSubscriber?.id) return;
+
+    setSubmitLoading(true);
+    const toastId = showToast('loading', 'Deleting subscriber record...');
+
+    try {
+      const { error } = await supabase
+        .from('newsletter_subscribers')
+        .delete()
+        .eq('id', currentSubscriber.id);
+
+      if (error) throw error;
+
+      showToast('success', 'Subscriber removed successfully!');
+      setIsDeleteSubscriberModalOpen(false);
+      setCurrentSubscriber(null);
+      fetchSubscribers();
+    } catch (err: any) {
+      console.error(err);
+      showToast('error', err.message || 'Failed to delete subscriber.');
+    } finally {
+      removeToast(toastId);
+      setSubmitLoading(false);
     }
   };
 
@@ -313,6 +372,9 @@ export default function AdminDashboard({ onLogout, onRefreshProducts, productsLi
   const completedOrders = orders.filter(o => o.status === 'Delivered').length;
   const totalRevenue = orders.filter(o => o.status !== 'Cancelled').reduce((acc, o) => acc + o.total_amount, 0);
 
+  // Subscriber stats
+  const totalSubscribers = subscribers.length;
+
   // Filtered products list
   const filteredProducts = products.filter(p => {
     const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -332,6 +394,16 @@ export default function AdminDashboard({ onLogout, onRefreshProducts, productsLi
       o.pincode.includes(term) ||
       String(o.id).includes(term) ||
       (o.order_id && o.order_id.toLowerCase().includes(term))
+    );
+  });
+
+  // Filtered subscribers list
+  const filteredSubscribers = subscribers.filter(s => {
+    const term = subscriberSearchQuery.toLowerCase();
+    const couponVal = s.coupon || s.coupon_code || '';
+    return (
+      (s.email && s.email.toLowerCase().includes(term)) ||
+      (couponVal && couponVal.toLowerCase().includes(term))
     );
   });
 
@@ -666,25 +738,33 @@ export default function AdminDashboard({ onLogout, onRefreshProducts, productsLi
           <nav className="space-y-2">
             <button
               onClick={() => setActiveSection('products')}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-sm font-body text-xs uppercase tracking-wider font-semibold transition-all ${
-                activeSection === 'products'
-                  ? 'bg-luxury-gold/10 border border-luxury-gold/20 text-luxury-gold'
-                  : 'bg-transparent border border-transparent text-white/60 hover:text-white hover:bg-white/[0.02]'
-              }`}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-sm font-body text-xs uppercase tracking-wider font-semibold transition-all ${activeSection === 'products'
+                ? 'bg-luxury-gold/10 border border-luxury-gold/20 text-luxury-gold'
+                : 'bg-transparent border border-transparent text-white/60 hover:text-white hover:bg-white/[0.02]'
+                }`}
             >
               <Package className="w-4 h-4" />
               Product Catalog
             </button>
             <button
               onClick={() => setActiveSection('orders')}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-sm font-body text-xs uppercase tracking-wider font-semibold transition-all ${
-                activeSection === 'orders'
-                  ? 'bg-luxury-gold/10 border border-luxury-gold/20 text-luxury-gold'
-                  : 'bg-transparent border border-transparent text-white/60 hover:text-white hover:bg-white/[0.02]'
-              }`}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-sm font-body text-xs uppercase tracking-wider font-semibold transition-all ${activeSection === 'orders'
+                ? 'bg-luxury-gold/10 border border-luxury-gold/20 text-luxury-gold'
+                : 'bg-transparent border border-transparent text-white/60 hover:text-white hover:bg-white/[0.02]'
+                }`}
             >
               <ClipboardList className="w-4 h-4" />
               Orders List
+            </button>
+            <button
+              onClick={() => setActiveSection('subscribers')}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-sm font-body text-xs uppercase tracking-wider font-semibold transition-all ${activeSection === 'subscribers'
+                ? 'bg-luxury-gold/10 border border-luxury-gold/20 text-luxury-gold'
+                : 'bg-transparent border border-transparent text-white/60 hover:text-white hover:bg-white/[0.02]'
+                }`}
+            >
+              <Mail className="w-4 h-4" />
+              Newsletter Subscribers
             </button>
           </nav>
         </div>
@@ -799,8 +879,8 @@ export default function AdminDashboard({ onLogout, onRefreshProducts, productsLi
                     key={category}
                     onClick={() => setSelectedCategory(category)}
                     className={`px-4 py-2.5 rounded-sm font-body text-[10px] font-bold uppercase tracking-wider border shrink-0 transition-all ${selectedCategory === category
-                        ? 'bg-luxury-gold border-luxury-gold text-luxury-black'
-                        : 'bg-transparent border-white/10 text-white/50 hover:border-white/25 hover:text-white'
+                      ? 'bg-luxury-gold border-luxury-gold text-luxury-black'
+                      : 'bg-transparent border-white/10 text-white/50 hover:border-white/25 hover:text-white'
                       }`}
                   >
                     {category}
@@ -874,10 +954,10 @@ export default function AdminDashboard({ onLogout, onRefreshProducts, productsLi
                           {/* Stock */}
                           <td className="py-4 px-6 text-center">
                             <span className={`font-semibold ${product.stock === 0
-                                ? 'text-red-500'
-                                : product.stock <= 10
-                                  ? 'text-orange-400'
-                                  : 'text-white/80'
+                              ? 'text-red-500'
+                              : product.stock <= 10
+                                ? 'text-orange-400'
+                                : 'text-white/80'
                               }`}>
                               {product.stock}
                             </span>
@@ -995,7 +1075,7 @@ export default function AdminDashboard({ onLogout, onRefreshProducts, productsLi
               </div>
             </section>
           </>
-        ) : (
+        ) : activeSection === 'orders' ? (
           <>
             {/* Orders Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/5 pb-6">
@@ -1129,17 +1209,16 @@ export default function AdminDashboard({ onLogout, onRefreshProducts, productsLi
                             <select
                               value={order.status}
                               onChange={(e) => handleUpdateOrderStatus(order.id, e.target.value)}
-                              className={`px-2.5 py-1 text-[10px] uppercase font-bold tracking-wider rounded-sm bg-black/60 border ${
-                                order.status === 'Pending'
-                                  ? 'border-yellow-500/40 text-yellow-400'
-                                  : order.status === 'Processing'
-                                    ? 'border-blue-500/40 text-blue-400'
-                                    : order.status === 'Shipped'
-                                      ? 'border-purple-500/40 text-purple-400'
-                                      : order.status === 'Delivered'
-                                        ? 'border-green-500/40 text-green-400'
-                                        : 'border-red-500/40 text-red-400'
-                              } focus:outline-none cursor-pointer`}
+                              className={`px-2.5 py-1 text-[10px] uppercase font-bold tracking-wider rounded-sm bg-black/60 border ${order.status === 'Pending'
+                                ? 'border-yellow-500/40 text-yellow-400'
+                                : order.status === 'Processing'
+                                  ? 'border-blue-500/40 text-blue-400'
+                                  : order.status === 'Shipped'
+                                    ? 'border-purple-500/40 text-purple-400'
+                                    : order.status === 'Delivered'
+                                      ? 'border-green-500/40 text-green-400'
+                                      : 'border-red-500/40 text-red-400'
+                                } focus:outline-none cursor-pointer`}
                             >
                               <option value="Pending" className="bg-luxury-black text-yellow-400">Pending</option>
                               <option value="Processing" className="bg-luxury-black text-blue-400">Processing</option>
@@ -1207,13 +1286,12 @@ export default function AdminDashboard({ onLogout, onRefreshProducts, productsLi
                             <select
                               value={order.status}
                               onChange={(e) => handleUpdateOrderStatus(order.id, e.target.value)}
-                              className={`px-2 py-0.5 text-[9px] uppercase font-bold tracking-wider rounded-sm bg-black/60 border ${
-                                order.status === 'Pending' ? 'border-yellow-500/40 text-yellow-400' :
+                              className={`px-2 py-0.5 text-[9px] uppercase font-bold tracking-wider rounded-sm bg-black/60 border ${order.status === 'Pending' ? 'border-yellow-500/40 text-yellow-400' :
                                 order.status === 'Processing' ? 'border-blue-500/40 text-blue-400' :
-                                order.status === 'Shipped' ? 'border-purple-500/40 text-purple-400' :
-                                order.status === 'Delivered' ? 'border-green-500/40 text-green-400' :
-                                'border-red-500/40 text-red-400'
-                              } focus:outline-none cursor-pointer`}
+                                  order.status === 'Shipped' ? 'border-purple-500/40 text-purple-400' :
+                                    order.status === 'Delivered' ? 'border-green-500/40 text-green-400' :
+                                      'border-red-500/40 text-red-400'
+                                } focus:outline-none cursor-pointer`}
                             >
                               <option value="Pending" className="bg-luxury-black text-yellow-400">Pending</option>
                               <option value="Processing" className="bg-luxury-black text-blue-400">Processing</option>
@@ -1229,6 +1307,201 @@ export default function AdminDashboard({ onLogout, onRefreshProducts, productsLi
                             <Eye className="w-3 h-3" />
                             Details
                           </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </section>
+          </>
+        ) : (
+          <>
+            {/* Newsletter Subscribers Header */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/5 pb-6">
+              <div>
+                <h1 className="font-heading text-3xl md:text-4xl font-bold tracking-tight text-white mb-1.5">
+                  Newsletter <span className="gold-gradient-text">Subscribers</span>
+                </h1>
+                <p className="text-sm text-white/40 font-body">Manage customer subscriptions and promotional coupon allocations</p>
+              </div>
+              <button
+                onClick={fetchSubscribers}
+                className="flex items-center gap-2 px-4 py-2 border border-white/10 hover:border-luxury-gold/30 rounded-sm bg-white/[0.02] text-white/60 hover:text-luxury-gold transition-all duration-300 font-body text-xs font-semibold tracking-wider uppercase"
+              >
+                <RefreshCw className="w-3.5 h-3.5" />
+                Refresh Subscribers
+              </button>
+            </div>
+
+            {/* Subscribers Stats Grid */}
+            <section className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
+              <div className="glass-card p-5 rounded-sm border border-luxury-gold/10 flex items-center justify-between">
+                <div>
+                  <p className="text-[10px] uppercase text-white/45 tracking-wider font-semibold mb-1">Total Subscribers</p>
+                  <h3 className="font-heading text-2xl font-bold text-white">{totalSubscribers}</h3>
+                </div>
+                <div className="w-10 h-10 rounded-sm bg-white/[0.03] border border-white/10 flex items-center justify-center text-luxury-gold">
+                  <Mail className="w-5 h-5" />
+                </div>
+              </div>
+              <div className="glass-card p-5 rounded-sm border border-luxury-gold/10 flex items-center justify-between">
+                <div>
+                  <p className="text-[10px] uppercase text-white/45 tracking-wider font-semibold mb-1">Active Coupons Issued</p>
+                  <h3 className="font-heading text-2xl font-bold text-luxury-gold">{totalSubscribers}</h3>
+                </div>
+                <div className="w-10 h-10 rounded-sm bg-luxury-gold/10 border border-luxury-gold/20 flex items-center justify-center text-luxury-gold">
+                  <Tag className="w-5 h-5" />
+                </div>
+              </div>
+            </section>
+
+            {/* Subscribers Filter & Search */}
+            <section className="flex flex-col sm:flex-row items-center gap-4 bg-white/[0.01] border border-white/[0.06] p-4 rounded-sm">
+              <div className="relative w-full">
+                <Search className="absolute inset-y-0 left-3.5 my-auto w-4.5 h-4.5 text-white/35" />
+                <input
+                  type="text"
+                  placeholder="Search subscribers by email address or coupon code..."
+                  value={subscriberSearchQuery}
+                  onChange={(e) => setSubscriberSearchQuery(e.target.value)}
+                  className="w-full bg-black/40 border border-white/10 rounded-sm py-3.5 pl-11 pr-4 text-white font-body text-xs placeholder:text-white/20 focus:outline-none focus:border-luxury-gold transition-colors duration-300"
+                />
+              </div>
+            </section>
+
+            {/* Subscribers List Table / Cards */}
+            <section className="glass-card rounded-sm overflow-hidden border border-white/[0.06] shadow-luxury">
+              {/* Desktop Table View */}
+              <div className="hidden md:block overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="border-b border-luxury-gold/15 bg-black/40 text-[10px] uppercase font-bold text-luxury-gold tracking-wider">
+                      <th className="py-4 px-6">Email Address</th>
+                      <th className="py-4 px-6">Coupon Code</th>
+                      <th className="py-4 px-6">Created Date</th>
+                      <th className="py-4 px-6 text-center">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-white/[0.04] font-body text-xs text-white/80">
+                    {subscribersLoading ? (
+                      <tr>
+                        <td colSpan={4} className="py-12 text-center text-white/40">
+                          <div className="flex flex-col items-center justify-center">
+                            <svg className="animate-spin h-5 w-5 text-luxury-gold mb-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            <span>Loading subscribers record...</span>
+                          </div>
+                        </td>
+                      </tr>
+                    ) : filteredSubscribers.length === 0 ? (
+                      <tr>
+                        <td colSpan={4} className="py-12 text-center text-white/40">
+                          No newsletter subscribers found.
+                        </td>
+                      </tr>
+                    ) : (
+                      filteredSubscribers.map((sub) => (
+                        <tr key={sub.id} className="hover:bg-white/[0.01] transition-colors">
+                          <td className="py-4 px-6 font-bold text-white flex items-center gap-2.5">
+                            <div className="w-7 h-7 rounded-sm bg-white/5 border border-white/10 flex items-center justify-center text-luxury-gold shrink-0">
+                              <Mail className="w-3.5 h-3.5" />
+                            </div>
+                            <span className="truncate">{sub.email}</span>
+                          </td>
+                          <td className="py-4 px-6">
+                            {(sub.coupon || sub.coupon_code) ? (
+                              <span className="px-2.5 py-1 rounded-sm bg-luxury-gold/10 border border-luxury-gold/25 text-luxury-gold font-mono text-[11px] font-bold tracking-wider">
+                                {sub.coupon || sub.coupon_code}
+                              </span>
+                            ) : (
+                              <span className="text-white/30 italic">No Coupon</span>
+                            )}
+                          </td>
+                          <td className="py-4 px-6 text-white/60">
+                            {sub.created_at ? new Date(sub.created_at).toLocaleDateString('en-IN', {
+                              year: 'numeric',
+                              month: 'short',
+                              day: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            }) : 'N/A'}
+                          </td>
+                          <td className="py-4 px-6 text-center">
+                            <button
+                              onClick={() => {
+                                setCurrentSubscriber(sub);
+                                setIsDeleteSubscriberModalOpen(true);
+                              }}
+                              className="w-8 h-8 rounded-sm bg-white/5 hover:bg-red-950 border border-white/10 hover:border-red-900/50 flex items-center justify-center text-white/60 hover:text-red-400 transition-all mx-auto"
+                              title="Delete Subscriber"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Mobile Cards View */}
+              <div className="block md:hidden divide-y divide-white/[0.04] p-4 space-y-4">
+                {subscribersLoading ? (
+                  <div className="py-8 text-center text-white/40">
+                    <svg className="animate-spin h-5 w-5 text-luxury-gold mx-auto mb-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span className="text-xs">Loading subscribers record...</span>
+                  </div>
+                ) : filteredSubscribers.length === 0 ? (
+                  <p className="py-8 text-center text-white/40 font-body text-xs">No newsletter subscribers found.</p>
+                ) : (
+                  filteredSubscribers.map((sub) => (
+                    <div key={sub.id} className="pt-4 first:pt-0 flex flex-col gap-3 font-body text-xs text-white/80">
+                      <div className="flex justify-between items-start gap-2">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <div className="w-7 h-7 rounded-sm bg-white/5 border border-white/10 flex items-center justify-center text-luxury-gold shrink-0">
+                            <Mail className="w-3.5 h-3.5" />
+                          </div>
+                          <span className="font-bold text-white truncate">{sub.email}</span>
+                        </div>
+                        <button
+                          onClick={() => {
+                            setCurrentSubscriber(sub);
+                            setIsDeleteSubscriberModalOpen(true);
+                          }}
+                          className="w-8 h-8 rounded-sm bg-white/5 hover:bg-red-950 border border-white/10 flex items-center justify-center text-white/60 hover:text-red-400 shrink-0"
+                          title="Delete Subscriber"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+
+                      <div className="bg-black/20 p-3 rounded-sm border border-white/[0.03] flex justify-between items-center gap-2">
+                        <div className="flex flex-col gap-1">
+                          <span className="text-[9px] text-white/40 uppercase">Coupon Code</span>
+                          {(sub.coupon || sub.coupon_code) ? (
+                            <span className="px-2 py-0.5 rounded-sm bg-luxury-gold/10 border border-luxury-gold/25 text-luxury-gold font-mono text-[10px] font-bold">
+                              {sub.coupon || sub.coupon_code}
+                            </span>
+                          ) : (
+                            <span className="text-white/30 italic text-[10px]">No Coupon</span>
+                          )}
+                        </div>
+                        <div className="flex flex-col items-end gap-1">
+                          <span className="text-[9px] text-white/40 uppercase">Created Date</span>
+                          <span className="text-[10px] text-white/70">
+                            {sub.created_at ? new Date(sub.created_at).toLocaleDateString('en-IN', {
+                              month: 'short',
+                              day: 'numeric',
+                              year: '2-digit'
+                            }) : 'N/A'}
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -1643,6 +1916,58 @@ export default function AdminDashboard({ onLogout, onRefreshProducts, productsLi
         )}
       </AnimatePresence>
 
+      {/* ── Delete Subscriber Confirmation Modal ── */}
+      <AnimatePresence>
+        {isDeleteSubscriberModalOpen && currentSubscriber && (
+          <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => !submitLoading && setIsDeleteSubscriberModalOpen(false)}
+              className="absolute inset-0 bg-black/90 backdrop-blur-sm"
+            />
+
+            {/* Content */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="w-full max-w-md bg-luxury-black border border-red-900/30 rounded-md p-6 relative z-10 shadow-luxury"
+            >
+              <div className="text-center">
+                <div className="w-12 h-12 rounded-full bg-red-950/30 border border-red-900/40 flex items-center justify-center mx-auto mb-4 text-red-500 animate-pulse">
+                  <AlertTriangle className="w-6 h-6" />
+                </div>
+                <h3 className="font-heading text-xl font-bold text-white mb-2">Delete Subscriber</h3>
+                <p className="font-body text-xs text-white/50 mb-6 leading-relaxed">
+                  Are you sure you want to remove <b className="text-white">"{currentSubscriber.email}"</b> from newsletter subscribers?
+                  This action cannot be undone.
+                </p>
+              </div>
+
+              <div className="flex gap-3 justify-end">
+                <button
+                  onClick={() => !submitLoading && setIsDeleteSubscriberModalOpen(false)}
+                  className="px-4 py-3 border border-white/10 hover:border-white/20 text-white/60 hover:text-white rounded-sm font-body text-xs font-semibold uppercase tracking-wider transition-colors"
+                  disabled={submitLoading}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleDeleteSubscriberConfirm}
+                  disabled={submitLoading}
+                  className="px-5 py-3 bg-red-900 border border-red-800 text-white rounded-sm font-body text-xs font-semibold uppercase tracking-wider transition-all disabled:opacity-50 flex items-center gap-2"
+                >
+                  {submitLoading ? 'Deleting...' : 'Yes, Delete'}
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
       {/* ── Order Details Modal ── */}
       <AnimatePresence>
         {selectedOrder && (
@@ -1690,14 +2015,13 @@ export default function AdminDashboard({ onLogout, onRefreshProducts, productsLi
                   <p><span className="text-white/40">Order ID:</span> <span className="font-mono font-bold text-white">{selectedOrder.order_id || `#ORD-${selectedOrder.id}`}</span></p>
                   <p><span className="text-white/40">Order Date & Time:</span> <span className="text-white">{new Date(selectedOrder.created_at).toLocaleString('en-IN')}</span></p>
                   <p className="flex items-center gap-1.5">
-                    <span className="text-white/40">Current Status:</span> 
-                    <span className={`px-2 py-0.5 text-[9px] uppercase font-bold tracking-wider rounded-sm ${
-                      selectedOrder.status === 'Pending' ? 'bg-yellow-950/20 text-yellow-400 border border-yellow-900/30' :
+                    <span className="text-white/40">Current Status:</span>
+                    <span className={`px-2 py-0.5 text-[9px] uppercase font-bold tracking-wider rounded-sm ${selectedOrder.status === 'Pending' ? 'bg-yellow-950/20 text-yellow-400 border border-yellow-900/30' :
                       selectedOrder.status === 'Processing' ? 'bg-blue-950/20 text-blue-400 border border-blue-900/30' :
-                      selectedOrder.status === 'Shipped' ? 'bg-purple-950/20 text-purple-400 border border-purple-900/30' :
-                      selectedOrder.status === 'Delivered' ? 'bg-green-950/20 text-green-400 border border-green-900/30' :
-                      'bg-red-950/20 text-red-400 border border-red-900/30'
-                    }`}>
+                        selectedOrder.status === 'Shipped' ? 'bg-purple-950/20 text-purple-400 border border-purple-900/30' :
+                          selectedOrder.status === 'Delivered' ? 'bg-green-950/20 text-green-400 border border-green-900/30' :
+                            'bg-red-950/20 text-red-400 border border-red-900/30'
+                      }`}>
                       {selectedOrder.status}
                     </span>
                   </p>

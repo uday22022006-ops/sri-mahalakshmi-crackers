@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react';
+import { supabase } from "../lib/supabase";
 import { motion, useInView } from 'framer-motion';
 import { Mail, ArrowRight, CheckCircle } from 'lucide-react';
 
@@ -12,14 +13,39 @@ const benefits = [
 const Newsletter = () => {
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [coupon, setCoupon] = useState('');
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, margin: '-80px' });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) { setStatus('error'); return; }
-    setStatus('loading');
-    setTimeout(() => { setStatus('success'); setEmail(''); }, 1600);
+    console.log(email);
+    if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+      setStatus("error");
+      return;
+    }
+
+    setStatus("loading");
+
+    const generatedCoupon = "SMP" + Math.floor(100000 + Math.random() * 900000);
+    setCoupon(generatedCoupon);
+
+    const { error } = await supabase
+      .from("newsletter_subscribers")
+      .insert([
+        {
+          email,
+          coupon: generatedCoupon,
+        },
+      ]);
+
+    if (error) {
+      setStatus("error");
+      return;
+    }
+
+    setStatus("success");
+    setEmail("");
   };
 
   return (
@@ -86,7 +112,13 @@ const Newsletter = () => {
               >
                 <CheckCircle className="w-12 h-12 text-luxury-gold" />
                 <h3 className="font-heading text-xl text-luxury-gold">Welcome to the Circle!</h3>
-                <p className="font-body text-sm text-white/50">Your 15% discount code is heading to your inbox.</p>
+                <p className="font-body text-sm text-white/70">Your exclusive 15% discount coupon is:</p>
+                {coupon && (
+                  <div className="my-2 px-4 py-2 bg-luxury-gold/10 border border-luxury-gold/30 rounded-sm inline-block">
+                    <span className="font-mono text-base font-bold text-luxury-gold tracking-widest">{coupon}</span>
+                  </div>
+                )}
+                <p className="font-body text-xs text-white/40">Use this code at checkout to claim your discount.</p>
               </motion.div>
             ) : (
               <form onSubmit={handleSubmit} className="mb-8">
@@ -98,11 +130,10 @@ const Newsletter = () => {
                       value={email}
                       onChange={e => { setEmail(e.target.value); setStatus('idle'); }}
                       placeholder="your@email.com"
-                      className={`w-full bg-white/[0.04] border rounded-sm py-4 pl-11 pr-4 text-sm text-white placeholder-white/20 font-body focus:outline-none transition-all duration-300 ${
-                        status === 'error'
-                          ? 'border-red-500/50 focus:border-red-500/80'
-                          : 'border-luxury-gold/15 focus:border-luxury-gold/50'
-                      }`}
+                      className={`w-full bg-white/[0.04] border rounded-sm py-4 pl-11 pr-4 text-sm text-white placeholder-white/20 font-body focus:outline-none transition-all duration-300 ${status === 'error'
+                        ? 'border-red-500/50 focus:border-red-500/80'
+                        : 'border-luxury-gold/15 focus:border-luxury-gold/50'
+                        }`}
                       id="newsletter-email"
                     />
                   </div>

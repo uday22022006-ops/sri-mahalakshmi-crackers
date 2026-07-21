@@ -436,9 +436,11 @@ function QuickViewModal({
                 <span className="font-heading text-2xl font-bold text-luxury-gold">{fmt(product.price)}</span>
                 <span className="font-body text-sm text-white/25 line-through">{fmt(product.original_price)}</span>
               </div>
-              <div className="inline-flex items-center gap-1 bg-luxury-maroon/30 border border-luxury-maroon/40 px-2.5 py-1 rounded-sm mb-5">
-                <span className="font-body text-xs font-bold text-luxury-gold">{product.discount}% OFF</span>
-              </div>
+              {(product.discount ?? 0) > 0 && (
+                <div className="inline-flex items-center gap-1 bg-luxury-maroon/30 border border-luxury-maroon/40 px-2.5 py-1 rounded-sm mb-5">
+                  <span className="font-body text-xs font-bold text-luxury-gold">{product.discount}% OFF</span>
+                </div>
+              )}
 
               <div className="flex gap-2">
                 <motion.button

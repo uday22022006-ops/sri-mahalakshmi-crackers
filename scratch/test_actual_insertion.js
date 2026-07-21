@@ -48,13 +48,13 @@ async function testActualInsertion() {
   try {
     const uniqueOrderNo = `ORD-${Date.now()}-${Math.floor(1000 + Math.random() * 9000)}`;
     console.log("Simulating checkout insert query for Order ID:", uniqueOrderNo);
-    
+
     const { data, error } = await supabase
       .from('orders')
       .insert([{
         order_id: uniqueOrderNo,
         customer_name: 'Verification Customer',
-        phone: '9876543210',
+        phone: '8344112220',
         address: '456 Celebration Road, Sivakasi',
         pincode: '626123',
         total_amount: 1150,
@@ -68,7 +68,7 @@ async function testActualInsertion() {
       console.error("Simulation insert failed:", error);
     } else {
       console.log("Simulation insert succeeded! Inserted record:", data[0]);
-      
+
       // Now let's simulate how AdminDashboard views this order detail
       console.log("\nSimulating admin dashboard order detail parsing...");
       const order = data[0];
@@ -79,14 +79,14 @@ async function testActualInsertion() {
         console.log("Item 1 Qty:", parsedItems[0].qty);
         console.log("Item 1 Price:", parsedItems[0].price);
       }
-      
+
       // Clean up
       console.log("\nCleaning up simulation record...");
       const { error: deleteError } = await supabase
         .from('orders')
         .delete()
         .eq('id', order.id);
-        
+
       if (deleteError) {
         console.error("Cleanup error:", deleteError);
       } else {

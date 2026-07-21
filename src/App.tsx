@@ -16,6 +16,7 @@ import FeaturedBrands from './components/FeaturedBrands';
 import CustomerReviews from './components/CustomerReviews';
 import FAQSection from './components/FAQSection';
 import Newsletter from './components/Newsletter';
+import SafetyGuidelines from './components/SafetyGuidelines';
 import Footer from './components/Footer';
 import ScrollToTop from './components/ScrollToTop';
 import CategoriesPage from './components/CategoriesPage';
@@ -446,6 +447,7 @@ function App() {
             <CustomerReviews />
             <FAQSection />
             <Newsletter />
+            <SafetyGuidelines />
           </>
         ) : currentView === 'categories' ? (
           <CategoriesPage

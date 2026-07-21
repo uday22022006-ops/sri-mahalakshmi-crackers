@@ -79,7 +79,7 @@ const Footer = () => {
 
             {/* WhatsApp CTA */}
             <motion.a
-              href="https://wa.me/919876543210"
+              href="https://wa.me/918344112220"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-3 bg-green-600/10 border border-green-600/30 text-green-400 rounded-sm px-5 py-3 text-sm font-body font-medium hover:bg-green-600/20 transition-all duration-300 mb-8"
@@ -87,7 +87,7 @@ const Footer = () => {
               whileTap={{ scale: 0.97 }}
             >
               <MessageCircle className="w-4 h-4" />
-              WhatsApp: +91 98765 43210
+              WhatsApp: +91 8344112220
             </motion.a>
 
             {/* Social Icons */}
