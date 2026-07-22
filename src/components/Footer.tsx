@@ -21,21 +21,21 @@ const footerLinks = {
     { label: 'Careers', href: '#' },
   ],
   categories: [
-    { label: 'Ground Chakkars', href: '#categories' },
-    { label: 'Flower Pots', href: '#categories' },
-    { label: 'Rockets', href: '#categories' },
-    { label: 'Gift Boxes', href: '#categories' },
-    { label: 'Fancy Items', href: '#categories' },
-    { label: 'Atom Bomb', href: '#categories' },
+    { label: 'Ground Chakkars', href: '/categories/ground-chakkars' },
+    { label: 'Flower Pots', href: '/categories/flower-pots' },
+    { label: 'Rockets', href: '/categories/rockets' },
+    { label: 'Gift Boxes', href: '/categories/gift-boxes' },
+    { label: 'Fancy Items', href: '/categories/fancy-items' },
+    { label: 'Atom Bomb', href: '/categories/atom-bomb' },
   ],
   quickLinks: [
-    { label: 'Home', href: '#home' },
-    { label: 'Products', href: '#products' },
-    { label: 'Today\'s Offers', href: '#festival-banner' },
+    { label: 'Home', href: '/' },
+    { label: 'Products', href: '/products' },
+    { label: 'Today\'s Offers', href: '/offers' },
     { label: 'Track Order', href: '#' },
     { label: 'Privacy Policy', href: '#' },
     { label: 'Terms & Conditions', href: '#' },
-    { label: 'Admin Login', href: '#admin' },
+    { label: 'Admin Login', href: '/admin/login' },
   ],
 };
 
@@ -47,6 +47,14 @@ const socialLinks = [
 ];
 
 const Footer = () => {
+  const navigate = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    if (href.startsWith('/')) {
+      e.preventDefault();
+      window.history.pushState(null, '', href);
+      window.dispatchEvent(new PopStateEvent('popstate'));
+    }
+  };
+
   return (
     <footer id="footer" className="bg-luxury-black border-t border-luxury-gold/10 relative overflow-hidden">
       {/* Background decoration */}
@@ -140,6 +148,7 @@ const Footer = () => {
                 <li key={link.label}>
                   <a
                     href={link.href}
+                    onClick={(e) => navigate(e, link.href)}
                     className="font-body text-sm text-white/40 hover:text-luxury-gold transition-colors duration-300 flex items-center gap-1.5 group"
                   >
                     <ArrowRight className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex-shrink-0" />
@@ -199,6 +208,7 @@ const Footer = () => {
                 <li key={link.label}>
                   <a
                     href={link.href}
+                    onClick={(e) => navigate(e, link.href)}
                     className="font-body text-sm text-white/40 hover:text-luxury-gold transition-colors duration-300"
                   >
                     {link.label}

@@ -1,4 +1,4 @@
-import { useState, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { motion, AnimatePresence, useInView } from 'framer-motion';
 import { Search, ChevronRight, Home, Flame, Heart, ShoppingCart, Eye, Star, Check, X } from 'lucide-react';
 import type { Product } from '../types';
@@ -49,6 +49,7 @@ interface ProductsPageProps {
   selectedCategory: string;
   setSelectedCategory: (cat: string) => void;
   onNavigateHome: () => void;
+  autoOpenProductId?: number | null;
 }
 
 const matchesCategory = (prodCat: string, selectedCat: string) => {
@@ -74,12 +75,24 @@ export default function ProductsPage({
   selectedCategory,
   setSelectedCategory,
   onNavigateHome,
+  autoOpenProductId,
 }: ProductsPageProps) {
   const headerRef = useRef<HTMLDivElement>(null);
   const isHeaderInView = useInView(headerRef, { once: true });
 
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [addedProductId, setAddedProductId] = useState<number | null>(null);
+
+  // Auto-open product modal if autoOpenProductId is set and products exist
+  useEffect(() => {
+    if (autoOpenProductId && products.length > 0) {
+      const prod = products.find(p => p.id === autoOpenProductId);
+      if (prod) {
+        setSelectedProduct(prod);
+      }
+    }
+  }, [autoOpenProductId, products]);
+
 
   // Dynamic filter
   const filteredProducts = useMemo(() => {

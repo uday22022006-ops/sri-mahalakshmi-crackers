@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "node scripts/generate-sitemap.js && vite build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
   },
@@ -16,9 +16,7 @@
     "jspdf-autotable": "^5.0.8",
     "lucide-react": "^0.427.0",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "sitemap": "^9.0.1",
-    "vite-plugin-sitemap": "^0.8.2"
+    "react-dom": "^18.3.1"
   },
   "devDependencies": {
     "@types/react": "^18.3.3",

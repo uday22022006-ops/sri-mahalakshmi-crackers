@@ -3,23 +3,23 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Heart, ShoppingCart, User, Menu, X, ChevronDown, Tag, Sparkles } from 'lucide-react';
 
 const categories = [
-  { label: 'Ground Chakkars', href: '#categories', emoji: '🌀' },
-  { label: 'Flower Pots', href: '#categories', emoji: '🌸' },
-  { label: 'Rockets', href: '#categories', emoji: '🚀' },
-  { label: 'Gift Boxes', href: '#categories', emoji: '🎁' },
-  { label: 'Fancy Items', href: '#categories', emoji: '✨' },
-  { label: 'Atom Bomb', href: '#categories', emoji: '💥' },
-  { label: 'Sparklers', href: '#categories', emoji: '🌟' },
-  { label: 'Sky Shots', href: '#categories', emoji: '🎆' },
+  { label: 'Ground Chakkars', href: '/categories/ground-chakkars', emoji: '🌀' },
+  { label: 'Flower Pots', href: '/categories/flower-pots', emoji: '🌸' },
+  { label: 'Rockets', href: '/categories/rockets', emoji: '🚀' },
+  { label: 'Gift Boxes', href: '/categories/gift-boxes', emoji: '🎁' },
+  { label: 'Fancy Items', href: '/categories/fancy-items', emoji: '✨' },
+  { label: 'Atom Bomb', href: '/categories/atom-bomb', emoji: '💥' },
+  { label: 'Sparklers', href: '/categories/sparklers', emoji: '🌟' },
+  { label: 'Sky Shots', href: '/categories/sky-shots', emoji: '🎆' },
 ];
 
 const navLinks = [
-  { label: 'Home', href: '#home' },
-  { label: 'Categories', href: '#categories', hasDropdown: true },
-  { label: 'Products', href: '#products' },
-  { label: 'Offers', href: '#offers' },
-  { label: 'About', href: '#why-smp' },
-  { label: 'Contact', href: '#footer' },
+  { label: 'Home', href: '/' },
+  { label: 'Categories', href: '/categories', hasDropdown: true },
+  { label: 'Products', href: '/products' },
+  { label: 'Offers', href: '/offers' },
+  { label: 'About', href: '/#why-smp' },
+  { label: 'Contact', href: '/#footer' },
 ];
 
 interface NavbarProps {
@@ -42,6 +42,13 @@ const Navbar = ({
   isAdmin = false,
 }: NavbarProps) => {
   const [scrolled, setScrolled] = useState(false);
+  const navigate = (e: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>, href: string) => {
+    if (href.startsWith('/')) {
+      e.preventDefault();
+      window.history.pushState(null, '', href);
+      window.dispatchEvent(new PopStateEvent('popstate'));
+    }
+  };
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [catDropOpen, setCatDropOpen] = useState(false);
@@ -125,8 +132,9 @@ const Navbar = ({
         <div className="relative container-luxury flex items-center justify-between h-20 md:h-24">
           {/* Animated Premium Logo */}
           <motion.a
-            href="#home"
+            href="/"
             className="flex items-center gap-4 group flex-shrink-0"
+            onClick={(e) => navigate(e, '/')}
           >
             <motion.div
               className="relative flex items-center justify-center flex-shrink-0"
@@ -199,10 +207,9 @@ const Navbar = ({
                               key={cat.label}
                               href={cat.href}
                               className="flex items-center gap-3 px-5 py-3 hover:bg-luxury-gold/10 transition-colors duration-300 group/item relative overflow-hidden"
-                              onClick={() => {
-                                setSelectedCategory(cat.label);
+                              onClick={(e) => {
                                 setCatDropOpen(false);
-                                window.location.hash = '#products';
+                                navigate(e, cat.href);
                               }}
                               initial={{ x: -20, opacity: 0 }}
                               animate={{ x: 0, opacity: 1 }}
@@ -228,9 +235,8 @@ const Navbar = ({
                   key={item.label}
                   href={item.href}
                   className="px-4 py-2 font-body text-sm font-medium text-white/80 hover:text-luxury-gold transition-colors duration-300 relative group rounded-md"
-                  onClick={() => {
-                    if (item.label === 'Home') setSelectedCategory('');
-                    if (item.label === 'Products') setSelectedCategory('');
+                  onClick={(e) => {
+                    navigate(e, item.href);
                   }}
                   whileHover={{ y: -2 }}
                   transition={{ type: "spring", stiffness: 400, damping: 17 }}
@@ -322,8 +328,9 @@ const Navbar = ({
 
             {/* Premium Shop Now CTA */}
             <motion.a
-              href="#products"
+              href="/products"
               className="hidden md:flex relative items-center gap-2 ml-4 px-6 py-2.5 rounded-md overflow-hidden group font-body font-bold text-xs tracking-widest uppercase transition-all duration-300 shadow-[0_0_20px_rgba(212,175,55,0.3)] hover:shadow-[0_0_30px_rgba(212,175,55,0.6)] bg-gradient-to-r from-luxury-gold-dark via-luxury-gold to-luxury-gold-light text-luxury-black"
+              onClick={(e) => navigate(e, '/products')}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
@@ -363,9 +370,7 @@ const Navbar = ({
                 key={cat.label}
                 href={cat.href}
                 onClick={(e) => {
-                  e.preventDefault();
-                  setSelectedCategory(cat.label);
-                  window.location.hash = '#products';
+                  navigate(e, cat.href);
                 }}
                 className="flex items-center gap-2 font-body text-[11px] font-bold text-white/50 hover:text-luxury-gold transition-all duration-300 tracking-[0.15em] uppercase group"
               >
@@ -453,10 +458,9 @@ const Navbar = ({
                       initial={{ x: 40, opacity: 0 }}
                       animate={{ x: 0, opacity: 1 }}
                       transition={{ delay: 0.1 + (i * 0.05), ease: "easeOut" }}
-                      onClick={() => {
-                        if (item.label === 'Home') setSelectedCategory('');
-                        if (item.label === 'Products') setSelectedCategory('');
+                      onClick={(e) => {
                         setMobileOpen(false);
+                        navigate(e, item.href);
                       }}
                     >
                       {item.label}
@@ -476,10 +480,9 @@ const Navbar = ({
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.3 + i * 0.05, ease: "easeOut" }}
-                        onClick={() => {
-                          setSelectedCategory(cat.label);
+                        onClick={(e) => {
                           setMobileOpen(false);
-                          window.location.hash = '#products';
+                          navigate(e, cat.href);
                         }}
                       >
                         <span className="text-lg">{cat.emoji}</span>
@@ -492,10 +495,13 @@ const Navbar = ({
 
               <div className="p-6 border-t border-luxury-gold/20 space-y-4 bg-black/40">
                 <motion.a
-                  href="#products"
+                  href="/products"
                   className="flex items-center justify-center gap-2 w-full py-4 bg-gradient-to-r from-luxury-gold-dark via-luxury-gold to-luxury-gold-light text-luxury-black font-body font-bold text-sm tracking-widest uppercase rounded-xl shadow-[0_0_20px_rgba(212,175,55,0.2)]"
+                  onClick={(e) => {
+                    setMobileOpen(false);
+                    navigate(e, '/products');
+                  }}
                   whileTap={{ scale: 0.96 }}
-                  onClick={() => setMobileOpen(false)}
                 >
                   <Tag className="w-4 h-4" />
                   Shop Now

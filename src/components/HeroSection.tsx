@@ -334,7 +334,7 @@ const HeroSection = ({ searchQuery, setSearchQuery }: HeroSectionProps) => {
           {/* CTA Buttons */}
           <motion.div variants={up} className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-10">
             <motion.a
-              href="#products"
+              href="/products"
               className="relative overflow-hidden inline-flex items-center justify-center gap-2 font-body font-semibold text-sm tracking-widest uppercase px-9 py-4 rounded-sm bg-luxury-gold text-luxury-black min-w-[210px]"
               whileHover={{ scale: 1.04, boxShadow: '0 0 40px rgba(212,175,55,0.65), 0 8px 30px rgba(0,0,0,0.4)' }}
               whileTap={{ scale: 0.97 }}
@@ -350,7 +350,7 @@ const HeroSection = ({ searchQuery, setSearchQuery }: HeroSectionProps) => {
             </motion.a>
 
             <motion.a
-              href="#offers"
+              href="/offers"
               className="inline-flex items-center justify-center gap-2 font-body font-semibold text-sm tracking-widest uppercase px-9 py-4 rounded-sm border border-luxury-gold/50 text-luxury-gold min-w-[210px] hover:bg-luxury-gold/8 transition-colors duration-300"
               style={{ backdropFilter: 'blur(8px)' }}
               whileHover={{ scale: 1.04, borderColor: 'rgba(212,175,55,0.9)', boxShadow: '0 0 25px rgba(212,175,55,0.25), inset 0 0 20px rgba(212,175,55,0.05)' }}

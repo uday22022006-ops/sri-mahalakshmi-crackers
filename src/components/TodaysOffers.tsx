@@ -239,7 +239,7 @@ const TodaysOffers = ({ addToCart }: TodaysOffersProps) => {
           transition={{ delay: 0.7 }}
         >
           <motion.a
-            href="#products"
+            href="/products"
             className="inline-flex items-center gap-2 border border-luxury-gold/30 text-luxury-gold font-body text-xs font-semibold tracking-widest uppercase px-8 py-3.5 rounded-sm hover:bg-luxury-gold/8 transition-colors"
             whileHover={{ scale: 1.03, borderColor: 'rgba(212,175,55,0.7)' }}
             whileTap={{ scale: 0.97 }}

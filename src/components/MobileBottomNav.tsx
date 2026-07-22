@@ -8,11 +8,12 @@ const MobileBottomNav = () => {
   useEffect(() => {
     const handleHash = () => {
       const hash = window.location.hash;
-      if (hash.startsWith('#categories')) {
+      const path = window.location.pathname;
+      if (path === '/categories' || hash.startsWith('#categories')) {
         setActiveTab('categories');
-      } else if (hash.startsWith('#products')) {
+      } else if (path === '/products' || hash.startsWith('#products')) {
         setActiveTab('products');
-      } else if (hash.startsWith('#offers')) {
+      } else if (path === '/offers' || hash.startsWith('#offers')) {
         setActiveTab('offers');
       } else {
         setActiveTab('home');
@@ -20,19 +21,24 @@ const MobileBottomNav = () => {
     };
     handleHash();
     window.addEventListener('hashchange', handleHash);
-    return () => window.removeEventListener('hashchange', handleHash);
+    window.addEventListener('popstate', handleHash);
+    return () => {
+      window.removeEventListener('hashchange', handleHash);
+      window.removeEventListener('popstate', handleHash);
+    };
   }, []);
 
   const navItems = [
-    { id: 'home', label: 'Home', icon: Home, href: '#home' },
-    { id: 'categories', label: 'Categories', icon: Flame, href: '#categories' },
-    { id: 'search', label: 'Search', icon: Search, href: '#home', triggerSearch: true },
-    { id: 'offers', label: 'Offers', icon: Gift, href: '#offers' },
-    { id: 'wishlist', label: 'Wishlist', icon: Heart, href: '#products' },
+    { id: 'home', label: 'Home', icon: Home, href: '/' },
+    { id: 'categories', label: 'Categories', icon: Flame, href: '/categories' },
+    { id: 'search', label: 'Search', icon: Search, href: '/', triggerSearch: true },
+    { id: 'offers', label: 'Offers', icon: Gift, href: '/offers' },
+    { id: 'wishlist', label: 'Wishlist', icon: Heart, href: '/products' },
   ];
 
   const handleTap = (item: typeof navItems[0]) => {
-    window.location.hash = item.href;
+    window.history.pushState(null, '', item.href);
+    window.dispatchEvent(new PopStateEvent('popstate'));
     if (item.triggerSearch) {
       setTimeout(() => {
         // Find navbar search button and click it to open

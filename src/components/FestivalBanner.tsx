@@ -133,7 +133,7 @@ const FestivalBanner = () => {
             transition={{ delay: 0.75 }}
           >
             <motion.a
-              href="#offers"
+              href="/offers"
               className="inline-flex items-center gap-2 bg-luxury-gold text-luxury-black font-body font-semibold text-sm tracking-widest uppercase px-9 py-4 rounded-sm min-w-[220px] justify-center"
               whileHover={{ scale: 1.05, boxShadow: '0 0 40px rgba(212,175,55,0.65)' }}
               whileTap={{ scale: 0.97 }}

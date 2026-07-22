@@ -46,10 +46,12 @@ const CategoryIconSection = ({ setSelectedCategory }: CategoryIconSectionProps) 
           {iconCategories.map((cat, i) => (
             <motion.a
               key={cat.name}
-              href="#products"
+              href={`/categories/${encodeURIComponent(cat.name.toLowerCase().replace(/ /g, '-'))}`}
               onClick={(e) => {
                 e.preventDefault();
                 setSelectedCategory(cat.name);
+                // Trigger a pushState navigation to update the browser URL bar
+                window.history.pushState(null, '', `/categories/${encodeURIComponent(cat.name.toLowerCase().replace(/ /g, '-'))}`);
                 document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' });
               }}
               className="flex-shrink-0 flex flex-col items-center group w-24 sm:w-28 text-center"

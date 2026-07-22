@@ -69,6 +69,7 @@ function App() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [autoOpenProductId, setAutoOpenProductId] = useState<number | null>(null);
 
   const fetchProducts = async () => {
     try {
@@ -98,6 +99,33 @@ function App() {
     fetchProducts();
   }, []);
 
+  // Global click interceptor to enable client-side navigation for clean URLs
+  useEffect(() => {
+    const handleGlobalClick = (e: MouseEvent) => {
+      // Only handle standard left clicks without modifier keys
+      if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+
+      const anchor = (e.target as HTMLElement).closest('a');
+      if (!anchor) return;
+
+      // Skip external links or target="_blank"
+      if (anchor.target === '_blank') return;
+
+      const href = anchor.getAttribute('href');
+      if (!href) return;
+
+      // Intercept local clean paths starting with '/'
+      if (href.startsWith('/') && !href.startsWith('//')) {
+        e.preventDefault();
+        window.history.pushState(null, '', href);
+        window.dispatchEvent(new PopStateEvent('popstate'));
+      }
+    };
+
+    document.addEventListener('click', handleGlobalClick);
+    return () => document.removeEventListener('click', handleGlobalClick);
+  }, []);
+
   useEffect(() => {
     const handleHash = () => {
       const hash = window.location.hash;
@@ -117,14 +145,54 @@ function App() {
           setCurrentView('dashboard');
           window.scrollTo({ top: 0, behavior: 'instant' as any });
         }
-      } else if (hash.startsWith('#categories')) {
-        setCurrentView('categories');
-        window.scrollTo({ top: 0, behavior: 'instant' as any });
-      } else if (hash.startsWith('#products')) {
+      } else if (path.startsWith('/product/')) {
+        const prodId = parseInt(path.substring('/product/'.length), 10);
+        if (!isNaN(prodId)) {
+          setAutoOpenProductId(prodId);
+        }
         setCurrentView('products');
+        setSelectedCategory('');
         window.scrollTo({ top: 0, behavior: 'instant' as any });
+      } else if (path.startsWith('/categories/')) {
+        const catSlug = decodeURIComponent(path.substring('/categories/'.length)).toLowerCase();
+        const categoriesList = [
+          'Ground Chakkars',
+          'Flower Pots',
+          'Rockets',
+          'Gift Boxes',
+          'Fancy Items',
+          'Atom Bomb',
+          'Sparklers',
+          'Sky Shots'
+        ];
+        const matched = categoriesList.find(c => c.toLowerCase().replace(/ /g, '-') === catSlug);
+        if (matched) {
+          setSelectedCategory(matched);
+        }
+        setCurrentView('products');
+        setAutoOpenProductId(null);
+        window.scrollTo({ top: 0, behavior: 'instant' as any });
+      } else if (path === '/categories' || hash.startsWith('#categories')) {
+        setCurrentView('categories');
+        setSelectedCategory('');
+        setAutoOpenProductId(null);
+        window.scrollTo({ top: 0, behavior: 'instant' as any });
+      } else if (path === '/products' || hash.startsWith('#products')) {
+        setCurrentView('products');
+        setSelectedCategory('');
+        setAutoOpenProductId(null);
+        window.scrollTo({ top: 0, behavior: 'instant' as any });
+      } else if (path === '/offers') {
+        setCurrentView('home');
+        setSelectedCategory('');
+        setAutoOpenProductId(null);
+        setTimeout(() => {
+          document.getElementById('offers')?.scrollIntoView({ behavior: 'smooth' });
+        }, 150);
       } else {
         setCurrentView('home');
+        setSelectedCategory('');
+        setAutoOpenProductId(null);
       }
     };
 
@@ -467,6 +535,7 @@ function App() {
             selectedCategory={selectedCategory}
             setSelectedCategory={setSelectedCategory}
             onNavigateHome={handleNavigateHome}
+            autoOpenProductId={autoOpenProductId}
           />
         )}
       </main>
