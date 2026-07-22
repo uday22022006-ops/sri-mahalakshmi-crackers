@@ -193,7 +193,13 @@ export default function ProductsPage({
                 return (
                   <motion.button
                     key={opt.value}
-                    onClick={() => setSelectedCategory(opt.value)}
+                    onClick={() => {
+                      const href = opt.value
+                        ? `/categories/${encodeURIComponent(opt.value.toLowerCase().replace(/ /g, '-'))}`
+                        : '/products';
+                      window.history.pushState(null, '', href);
+                      window.dispatchEvent(new PopStateEvent('popstate'));
+                    }}
                     className={`flex items-center gap-1.5 px-4 py-2.5 rounded-sm font-body text-xs font-semibold uppercase tracking-wider transition-all duration-300 border whitespace-nowrap ${isSelected
                       ? 'bg-luxury-gold border-luxury-gold text-luxury-black shadow-gold'
                       : 'bg-white/[0.02] border-white/5 text-white/60 hover:border-luxury-gold/40 hover:text-luxury-gold'
@@ -385,7 +391,8 @@ export default function ProductsPage({
   );
 }
 
-// Modal component inside the same file for cleanliness
+import { updateSEO } from '../lib/seo';
+
 function QuickViewModal({
   product,
   onClose,
@@ -399,6 +406,22 @@ function QuickViewModal({
   isWishlisted: boolean;
   onWishlistToggle: () => void;
 }) {
+  // Update SEO for individual product
+  useEffect(() => {
+    updateSEO({
+      title: `${product.name} | Sri Mahalakshmi Crackers`,
+      description: product.description || `Buy ${product.name} from Sri Mahalakshmi Crackers at wholesale price.`
+    });
+    
+    // Cleanup - revert to Products title when closing
+    return () => {
+      updateSEO({
+        title: 'All Products | Sri Mahalakshmi Crackers',
+        description: 'View our complete catalog of premium fireworks and crackers at wholesale prices.'
+      });
+    };
+  }, [product]);
+
   const handleCart = () => {
     onAddToCart();
     onClose();

@@ -31,6 +31,7 @@ import FloatingMiniCart from './components/FloatingMiniCart';
 import { supabase } from './lib/supabase';
 import productsData from './data/products.json';
 import type { Product } from './types';
+import { updateSEO } from './lib/seo';
 
 interface CartItem {
   id: number;
@@ -61,7 +62,9 @@ function App() {
     return () => subscription.unsubscribe();
   }, []);
 
+
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
+
   const [wishlist, setWishlist] = useState<number[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
@@ -131,6 +134,38 @@ function App() {
       const hash = window.location.hash;
       const path = window.location.pathname;
 
+      // Ensure seo lib is loaded before attempting to update SEO
+      const applySEO = (view: string, extra?: { category?: string }) => {
+        if (view === 'offers') {
+          updateSEO({
+            title: 'Cracker Offers | Sri Mahalakshmi Crackers',
+            description: 'Find the best offers on premium Sivakasi crackers and fireworks.'
+          });
+        } else if (view === 'home') {
+          updateSEO({
+            title: 'Sri Mahalakshmi Crackers | Premium Sivakasi Crackers',
+            description: 'Buy premium Sivakasi crackers online from Sri Mahalakshmi Crackers. Best quality fireworks, gift boxes, sparklers, rockets, flower pots, sky shots and festival offers at wholesale prices.'
+          });
+        } else if (view === 'categories') {
+          updateSEO({
+            title: 'Cracker Categories | Sri Mahalakshmi Crackers',
+            description: 'Browse our wide range of premium Sivakasi crackers by category including sparklers, flower pots, rockets, and gift boxes.'
+          });
+        } else if (view === 'products') {
+          if (extra?.category) {
+            updateSEO({
+              title: `${extra.category} Collection | Sri Mahalakshmi Crackers`,
+              description: `Shop our premium collection of ${extra.category}. High quality Sivakasi fireworks and crackers at wholesale prices.`
+            });
+          } else {
+            updateSEO({
+              title: 'All Products | Sri Mahalakshmi Crackers',
+              description: 'View our complete catalog of premium fireworks and crackers at wholesale prices.'
+            });
+          }
+        }
+      };
+
       if (path === '/admin/login' || hash === '#admin' || hash === '#/admin/login') {
         if (adminSession) {
           window.location.hash = '#dashboard';
@@ -153,6 +188,7 @@ function App() {
         setCurrentView('products');
         setSelectedCategory('');
         window.scrollTo({ top: 0, behavior: 'instant' as any });
+        applySEO('products');
       } else if (path.startsWith('/categories/')) {
         const catSlug = decodeURIComponent(path.substring('/categories/'.length)).toLowerCase();
         const categoriesList = [
@@ -172,27 +208,32 @@ function App() {
         setCurrentView('products');
         setAutoOpenProductId(null);
         window.scrollTo({ top: 0, behavior: 'instant' as any });
+        applySEO('products', { category: matched || undefined });
       } else if (path === '/categories' || hash.startsWith('#categories')) {
         setCurrentView('categories');
         setSelectedCategory('');
         setAutoOpenProductId(null);
         window.scrollTo({ top: 0, behavior: 'instant' as any });
+        applySEO('categories');
       } else if (path === '/products' || hash.startsWith('#products')) {
         setCurrentView('products');
         setSelectedCategory('');
         setAutoOpenProductId(null);
         window.scrollTo({ top: 0, behavior: 'instant' as any });
-      } else if (path === '/offers') {
+        applySEO('products');
+      } else if (path === '/offers' || hash.startsWith('#offers')) {
         setCurrentView('home');
         setSelectedCategory('');
         setAutoOpenProductId(null);
         setTimeout(() => {
           document.getElementById('offers')?.scrollIntoView({ behavior: 'smooth' });
         }, 150);
+        applySEO('offers');
       } else {
         setCurrentView('home');
         setSelectedCategory('');
         setAutoOpenProductId(null);
+        applySEO('home');
       }
     };
 
