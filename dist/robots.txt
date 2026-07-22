@@ -1,4 +1,7 @@
 User-agent: *
 Allow: /
+Disallow: /admin
+Disallow: /admin/login
+Disallow: /admin/dashboard
 
 Sitemap: https://smlcrackers.in/sitemap.xml
